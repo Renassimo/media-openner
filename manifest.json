@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Media openner",
+  "name": "Media picker",
   "version": "1.2",
   "description": "Click a button, then click any element on the page to open nearest image src in a new tab.",
   "permissions": ["activeTab", "scripting", "tabs"],

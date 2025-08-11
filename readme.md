@@ -1,4 +1,4 @@
-# Media Openner Chrome Extension
+# Media Picker Chrome Extension
 
 A simple Chrome extension that allows users to quickly open images in a new tab or window. Useful for previewing images, downloading, or viewing them at full size.
 
