@@ -13,16 +13,25 @@
       button {
         padding: 8px 12px;
         font-size: 14px;
+        cursor: pointer;
       }
       #status {
         margin-top: 8px;
         font-size: 12px;
         color: #444;
       }
+      .container {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
     </style>
   </head>
   <body>
-    <button id="selectModeBtn">Click to image</button>
+    <div class="container">
+      <button id="pickImageBtn">Click to pick image</button>
+      <button id="pickVideoBtn">Click to pick video</button>
+    </div>
     <div id="status"></div>
     <script src="popup.js"></script>
   </body>
