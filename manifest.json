@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Media picker",
-  "version": "1.5",
+  "version": "1.6",
   "description": "Click a button, then click any element on the page to open nearest image src in a new tab.",
   "permissions": ["activeTab", "scripting", "tabs", "contextMenus"],
   "host_permissions": ["<all_urls>"],
@@ -10,5 +10,15 @@
   },
   "background": {
     "service_worker": "background.js"
+  },
+  "commands": {
+    "pick_image_hotkey": {
+      "suggested_key": { "default": "Ctrl+I", "mac": "Command+I" },
+      "description": "Activate pick image mode"
+    },
+    "pick_video_hotkey": {
+      "suggested_key": { "default": "Ctrl+U", "mac": "Command+U" },
+      "description": "Activate pick video mode"
+    }
   }
 }

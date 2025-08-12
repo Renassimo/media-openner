@@ -1,12 +1,12 @@
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "pickImage",
-    title: "Pick image",
+    title: "Pick image (Cmd+I)",
     contexts: ["all"],
   });
   chrome.contextMenus.create({
     id: "pickVideo",
-    title: "Pick video",
+    title: "Pick video (CMD+U)",
     contexts: ["all"],
   });
 });
@@ -49,7 +49,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
           return null;
         }
 
-        const el = document.elementFromPoint(
+        const el = document?.elementFromPoint(
           window._contextMenuClickX,
           window._contextMenuClickY
         );
@@ -102,7 +102,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
           return sources[sources.length - 1].src;
         }
 
-        const el = document.elementFromPoint(
+        const el = document?.elementFromPoint(
           window._contextMenuClickX,
           window._contextMenuClickY
         );
@@ -138,5 +138,78 @@ function tabsQueryAndInject() {
         },
       });
     }
+  });
+}
+
+chrome.commands.onCommand.addListener((command) => {
+  if (command === "pick_image_hotkey") {
+    activatePickingMode("image");
+  }
+  if (command === "pick_video_hotkey") {
+    activatePickingMode("video");
+  }
+});
+
+function activatePickingMode(type) {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (!tabs[0]?.id) return;
+    chrome.scripting.executeScript({
+      target: { tabId: tabs[0].id },
+      func: (mode) => {
+        document.body.style.cursor = "crosshair";
+        const listener = (event) => {
+          event.preventDefault();
+          document.removeEventListener("click", listener, true);
+          document.body.style.cursor = "";
+          if (mode === "image") {
+            function findNearestImageSrc(element) {
+              if (!element) return null;
+              if (element.tagName?.toLowerCase() === "img" && element.src)
+                return element.src;
+              const imgInDescendants = element.querySelector("img");
+              if (imgInDescendants?.src) return imgInDescendants.src;
+              let sibling = element.nextElementSibling;
+              while (sibling) {
+                if (sibling.tagName?.toLowerCase() === "img" && sibling.src)
+                  return sibling.src;
+                const imgInSibling = sibling.querySelector("img");
+                if (imgInSibling?.src) return imgInSibling.src;
+                sibling = sibling.nextElementSibling;
+              }
+              return null;
+            }
+            const src = findNearestImageSrc(event.target);
+            if (src) window.open(src, "_blank");
+          } else if (mode === "video") {
+            function findVideoSourceUrl(element) {
+              if (!element) return null;
+              let videoEl =
+                element.tagName?.toLowerCase() === "video"
+                  ? element
+                  : element.querySelector("video");
+              if (!videoEl) return null;
+              const sources = Array.from(videoEl.querySelectorAll("source"));
+              if (!sources.length) return null;
+              const original = sources.find(
+                (s) => s.getAttribute("label")?.toLowerCase() === "original"
+              );
+              if (original) return original.src;
+              const numericSources = sources
+                .map((s) => ({ el: s, num: Number(s.getAttribute("label")) }))
+                .filter((s) => !isNaN(s.num));
+              if (numericSources.length) {
+                numericSources.sort((a, b) => b.num - a.num);
+                return numericSources[0].el.src;
+              }
+              return sources[sources.length - 1].src;
+            }
+            const src = findVideoSourceUrl(event.target);
+            if (src) window.open(src, "_blank");
+          }
+        };
+        document.addEventListener("click", listener, true);
+      },
+      args: [type],
+    });
   });
 }
